@@ -1,30 +1,33 @@
 package org.example;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
+import java.util.List;
+
 public class Main {
     private EntityManagerFactory emf;
     private Configuration con;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         new Main();
     }
 
-    public Main() {
-        con = new Configuration().configure("hiberbate.cfg.xml");
+    public Main() throws Exception {
+        con = new Configuration().configure("hibernate.cfg.xml");
 
-        //setUp();
+        setUp();
 
-        // SearchNameByFirstLetter();
-        // SearchByPartialName();
-        // ExpandedSearchPartial();
-        // ExpandedSearchComplete();
+        //searchPublisherByFirstLetter("T");
+        searchByPartialName("IN");
+        // expandedSearchPartial();
+        // expandedSearchComplete();
 
-        //tearDown();
+        tearDown();
     }
 
     protected void setUp() throws Exception {
@@ -44,29 +47,57 @@ public class Main {
     }
 
     // When the user enters a letter, find and display the names all
-    // authors where the first letter of the author’s name matches
+    // publishers where the first letter of the author’s name matches
     // the letter the user entered.
-    public void SearchNameByFirstLetter() {
+    public void searchPublisherByFirstLetter(String letter) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
 
+        List<String> publishers = em.createQuery("" +
+                "select p.name " +
+                "from PublishersEntity p " +
+                "where substring(cast(p.name as string), 1,1) = '" + letter  + "'")
+                .getResultList();
+
+        for (var name : publishers) {
+            System.out.println(name);
+        }
+        em.getTransaction().commit();
     }
 
-    //When the user enters all or a portion of an author’s name, find
-    // and display the names of all authors where the author’s name
+    //When the user enters all or a portion of a publisher’s name, find
+    // and display the names of all publishers where the publisher’s name
     // contains a match for the data entered by the user.
-    public void SearchByPartialName() {
+    public void searchByPartialName(String pubName) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
 
+        List<String> publishers = em.createQuery("" +
+                        "select p.name " +
+                        "from PublishersEntity p " +
+                        "where cast(p.name as string) like :name")
+                .setParameter("name", "%" + pubName + "%")
+                .getResultList();
+
+        for (String publisher : publishers) {
+            System.out.println(publisher);
+        }
+
+        em.getTransaction().commit();
+        em.close();
     }
+
 
     // When the user enters all or a portion of a publisher name, list
     // matching publishers with associated authors.
-    public void ExpandedSearchPartial() {
+    public void expandedSearchPartial() {
 
     }
 
     // When the user enters all or a portion of a book title, list matching
     // book titles with information that includes the author, publisher and
     // publication date.
-    public void ExpandedSearchComplete() {
+    public void expandedSearchComplete() {
 
     }
 
