@@ -22,8 +22,8 @@ public class Main {
 
         setUp();
         //searchPublisherByFirstLetter("J");
-        //SearchByPartialName("O");
-        ExpandedSearchPartial("D");
+        SearchByPartialName("O");
+        //ExpandedSearchPartial("D");
         // ExpandedSearchComplete();
 
         tearDown();
