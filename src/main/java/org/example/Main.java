@@ -93,18 +93,18 @@ public class Main {
     public void ExpandedSearchPartial(String partialTitle) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
-        System.out.println("testing method");
+
         List<Object[]> results = em.createQuery("" +
                         "select a.author, t.title " +
-                        "from AuthorsEntity a, TitlesEntity t, TitleauthorsEntity ta " +
+                        "from TitlesEntity t, TitleauthorsEntity ta, AuthorsEntity a " +
                         "where cast(t.title as string) like '%" + partialTitle + "%'" +
-                        "and t.isbn = ta.isbn " +
-                        "and ta.auId = a.auId"
-                ).getResultList();
+                        "and a.auId = ta.auId and t.isbn = ta.isbn "
+        ).getResultList();
 
-        for (Object[] result : results) {
-            System.out.println(result[0] + " -- " + result[1]);
-        }
+        results.forEach((result) -> {
+            System.out.println(result[0] + "----" + result[1]);
+        });
+
         em.getTransaction().commit();
     }
 
@@ -121,6 +121,9 @@ public class Main {
     public void ExpandedSearchComplete() {
 
     }
+
+
+
 
     /*
         public void showStudents() {
