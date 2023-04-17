@@ -1,7 +1,3 @@
-// Cameron Matherne
-// C00432219
-// CMPS 360
-// Project #4
 package org.example;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
