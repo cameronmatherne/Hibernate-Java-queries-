@@ -1,5 +1,8 @@
+// Cameron Matherne
+// C00432219
+// CMPS 360
+// Project #4
 package org.example;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.boot.MetadataSources;
@@ -7,7 +10,9 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
     private EntityManagerFactory emf;
@@ -19,13 +24,43 @@ public class Main {
 
     public Main() throws Exception {
         con = new Configuration().configure("hibernate.cfg.xml");
-
         setUp();
-        //searchPublisherByFirstLetter("J");
-        SearchByPartialName("O");
-        //ExpandedSearchPartial("D");
-        // ExpandedSearchComplete();
 
+        Scanner input = new Scanner(System.in);
+        System.out.println("Which method you like to demonstrate? Enter the corresponding number.");
+        System.out.println("---------------------------------------------------------------------");
+        System.out.println("(1): Search publisher name by first letter");
+        System.out.println("(2): Search publisher by full or partial name");
+        System.out.println("(3): Expanded search by all or partial book title");
+        System.out.println("(4): Complete search by all or partial book title");
+        System.out.println();
+        Integer line = input.nextInt();
+
+        input.nextLine();
+        switch (line) {
+            case 1:
+                System.out.println("Enter a letter");
+                String letter = input.nextLine();
+                SearchPublisherByFirstLetter(letter);
+                break;
+            case 2:
+                System.out.println("Enter letter(s)");
+                String letters = input.nextLine();
+                SearchByPartialName(letters);
+                break;
+            case 3:
+                System.out.println("Enter any title letters");
+                String title = input.nextLine();
+                ExpandedSearchPartial(title);
+                break;
+
+            case 4:
+                System.out.println("Enter any title letters");
+                String titles = input.nextLine();
+                ExpandedSearchComplete(titles);
+                break;
+
+        }
         tearDown();
     }
 
@@ -49,7 +84,7 @@ public class Main {
     // When the user enters a letter, find and display the names all
     // authors where the first letter of the author’s name matches
     // the letter the user entered.
-    public void searchPublisherByFirstLetter(String letter) {
+    public void SearchPublisherByFirstLetter(String letter) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         String upperCaseLetter = letter.toUpperCase();
@@ -84,94 +119,49 @@ public class Main {
         for (var name : names) {
             System.out.println(name);
         }
-
         em.getTransaction().commit();
     }
-
 
 
     public void ExpandedSearchPartial(String partialTitle) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
 
-        List<Object[]> results = em.createQuery("" +
-                        "select a.author, t.title " +
+        List<Object[] > results = em.createQuery(
+                "select t.title, a.author " +
                         "from TitlesEntity t, TitleauthorsEntity ta, AuthorsEntity a " +
-                        "where cast(t.title as string) like '%" + partialTitle + "%'" +
-                        "and a.auId = ta.auId and t.isbn = ta.isbn "
+                        "where cast(t.title as string) like '%" + partialTitle + "%' " +
+                        "and a.auId = ta.auId and trim(cast(ta.isbn as string)) = trim(cast(t.isbn as string)) "
         ).getResultList();
 
+        System.out.println("Search results: ");
         results.forEach((result) -> {
-            System.out.println(result[0] + "----" + result[1]);
+            System.out.println("Title: " + result[0] + ", Author: " + result[1]);
         });
-
         em.getTransaction().commit();
     }
-
-
-
-
-
-
 
 
     // When the user enters all or a portion of a book title, list matching
     // book titles with information that includes the author, publisher and
     // publication date.
-    public void ExpandedSearchComplete() {
-
-    }
-
-
-
-
-    /*
-        public void showStudents() {
+    public void ExpandedSearchComplete(String partialTitle) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
 
-        List<String> students = em.createQuery(
-                "select s.name from StudentEntity s"
+        List<Object[]> results = em.createQuery(
+                "select t.title, a.author, p.name, t.yearPublished " +
+                        "from TitlesEntity t, TitleauthorsEntity ta, AuthorsEntity a, PublishersEntity p " +
+                        "where cast(t.title as string) like '%" + partialTitle + "%' " +
+                        "and a.auId = ta.auId and trim(cast(ta.isbn as string)) = trim(cast(t.isbn as string)) " +
+                        "and t.pubid = p.pubid"
         ).getResultList();
 
-        students.forEach(System.out::println);
-
-        em.getTransaction().commit();
-    }
-
-    public void showStudentsSchedules() {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-
-        List<Object[]> schedules = em.createQuery("" +
-                "select s.name, c.coursedesc " +
-                "from StudentEntity s, CourseEntity c, EnrolledEntity e " +
-                "where s.id=e.id and c.courseid=e.courseid").getResultList();
-
-        schedules.forEach((record) -> {
-            System.out.println(record[0] + ", " + record[1]);
+        System.out.println("Search results: ");
+        results.forEach((result) -> {
+            System.out.println("Title: " + result[0] + ", Author: " + result[1] + ", Publisher: " + result[2] + ", Publication Date: " + result[3]);
         });
-
         em.getTransaction().commit();
     }
 
-    public void showStudentSchedule(String name) {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-
-        List<String> schedule = em.createQuery(
-                "select c.coursedesc " +
-                        "from StudentEntity s, CourseEntity c, EnrolledEntity e " +
-                        "where s.name='" + name + "' and s.id=e.id and c.courseid=e.courseid"
-        ).getResultList();
-
-        System.out.println("Schedule of " + name);
-        for (var course : schedule) {
-            System.out.println(course);
-        }
-
-        em.getTransaction().commit();
-    }
-
-     */
 }
